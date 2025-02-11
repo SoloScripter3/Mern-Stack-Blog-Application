@@ -1,16 +1,29 @@
-import express, { Application, Request, Response } from "express";
+import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import connectDB from "./config/dbConnection";
 
 dotenv.config();
 
-const app: Application = express();
+const startSever = async (port: number): Promise<void> => {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    throw new Error("MONGO_URI is not defined in env file");
+  }
 
-app.get("/", (req: Request, res: Response): void => {
-  res.send("Namasthe with Typescript");
-});
+  try {
+    await connectDB(uri);
+    const app: Express = express();
 
-const port: number = Number(process.env.PORT) || 5050;
+    app.get("/", (req: Request, res: Response): void => {
+      res.send("hello namasthe");
+    });
 
-app.listen(port, (): void => {
-  console.log(`http://localhost:${port}`);
-});
+    app.listen(process.env.PORT, () => {
+      console.log(`http://localhost:${process.env.PORT}`);
+    });
+  } catch (error) {
+    console.log("server setup error");
+  }
+};
+
+startSever(Number(process.env.PORT));
