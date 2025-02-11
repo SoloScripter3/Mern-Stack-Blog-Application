@@ -1,29 +1,26 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/dbConnection";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
-const startSever = async (port: number): Promise<void> => {
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    throw new Error("MONGO_URI is not defined in env file");
-  }
+//creating express app instance
+const app: Express = express();
 
-  try {
-    await connectDB(uri);
-    const app: Express = express();
+//middleware to parse json body
+app.use(express.json());
 
-    app.get("/", (req: Request, res: Response): void => {
-      res.send("hello namasthe");
-    });
+//routes
+app.use("/api/auth", authRoutes);
 
-    app.listen(process.env.PORT, () => {
-      console.log(`http://localhost:${process.env.PORT}`);
-    });
-  } catch (error) {
-    console.log("server setup error");
-  }
-};
+//port declaration
+const port = process.env.PORT || 5050;
 
-startSever(Number(process.env.PORT));
+//calling db connection function
+connectDB();
+
+//listening to the port
+app.listen(port, (): void => {
+  console.log(`http://localhost:${port}`);
+});
